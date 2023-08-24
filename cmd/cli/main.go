@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/WanderningMaster/ssetup.git/internal/render"
 )
 
 func main() {
-	fmt.Printf("ssetup CLI v0.0.1\n")
+	render.Loop()
 }
