@@ -31,7 +31,7 @@ func openNewScript() {
 	fmt.Print("Enter script name: ")
 
 	input := utils.ReadLine()
-	dir := store.GetTempDir()
+	dir := store.GetLocalDataDir()
 
 	cmd := exec.Command("vim", dir+"/"+input)
 
