@@ -14,6 +14,6 @@ func ReadLine() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	return strings.ReplaceAll(scanner.Text(), "\r", "")
+	input := strings.TrimRight(scanner.Text(), "\r\n")
+	return input
 }

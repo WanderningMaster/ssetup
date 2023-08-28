@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"sync"
+	"time"
 
 	"github.com/eiannone/keyboard"
 )
@@ -19,6 +21,29 @@ type MenuItem struct {
 	ID      string
 	SubMenu *Menu
 	Command func()
+}
+
+func Loader(wg *sync.WaitGroup, stopChan <-chan struct{}) {
+	clearScreen()
+	defer wg.Done()
+	frames := []string{
+		`[\]`,
+		`[|]`,
+		`[/]`,
+		`[-]`,
+	}
+	for {
+		select {
+		case <-stopChan:
+			return
+		default:
+			for _, frame := range frames {
+				fmt.Printf("%v\n", frame)
+				time.Sleep(1 * time.Second / 5)
+				clearScreen()
+			}
+		}
+	}
 }
 
 func NewMenu(prompt string) *Menu {
