@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"path/filepath"
 	"strings"
 )
 
@@ -70,6 +71,23 @@ func MatchExt(fileName string) (string, string, error) {
 	}
 
 	return exec, parts[0], nil
+}
+
+func AddFile(path string) {
+	abs, err := filepath.Abs(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	input, err := os.ReadFile(abs)
+	if err != nil {
+		log.Fatal(err)
+	}
+	dir := GetLocalDataDir()
+	filename := filepath.Base(abs)
+	destPath := fmt.Sprintf("%s/%s", dir, filename)
+	if err = os.WriteFile(destPath, input, 0644); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func ListScripts() ([]Script, error) {
