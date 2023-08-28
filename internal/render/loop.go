@@ -1,14 +1,13 @@
 package render
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/WanderningMaster/ssetup.git/internal/store"
+	"github.com/WanderningMaster/ssetup.git/internal/utils"
 	"github.com/eiannone/keyboard"
 )
 
@@ -28,10 +27,10 @@ const (
 )
 
 func openNewScript() {
-	reader := bufio.NewReader(os.Stdin)
+	keyboard.Close()
 	fmt.Print("Enter script name: ")
-	input, _ := reader.ReadString('\n')
-	input = strings.TrimSpace(input)
+
+	input := utils.ReadLine()
 	dir := store.GetTempDir()
 
 	cmd := exec.Command("vim", dir+"/"+input)
@@ -40,7 +39,9 @@ func openNewScript() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Run()
-
+	if err := keyboard.Open(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func Loop() {
@@ -53,15 +54,8 @@ func Loop() {
 	rootMenu.AddItem("Run", string(Run), nil)
 	rootMenu.AddItemWithSubMenu("Manage scripts", string(Manage), manageMenu)
 
-	for {
-		if err := keyboard.Open(); err != nil {
-			log.Fatal(err)
-		}
-		cmd := rootMenu.Loop()
-		if cmd == nil {
-			break
-		}
-		keyboard.Close()
-		cmd()
+	if err := keyboard.Open(); err != nil {
+		log.Fatal(err)
 	}
+	rootMenu.Loop()
 }

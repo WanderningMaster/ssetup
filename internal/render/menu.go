@@ -57,37 +57,37 @@ func (m *Menu) Render() {
 	}
 }
 
-func (m *Menu) MoveCursorUp() func() {
+func (m *Menu) MoveCursorUp() {
 	if m.CursorPos > 0 {
 		m.CursorPos -= 1
 	}
-
-	return nil
 }
 
-func (m *Menu) MoveCursorDown() func() {
+func (m *Menu) MoveCursorDown() {
 	if m.CursorPos < len(m.Items)-1 {
 		m.CursorPos += 1
 	}
-
-	return nil
 }
 
-func (m *Menu) Select() func() {
+func (m *Menu) Select() {
 	item := m.Items[m.CursorPos]
 	if item.SubMenu != nil {
-		return item.SubMenu.Loop()
+		item.SubMenu.Loop()
 	}
-	return item.Command
+	if item.Command != nil {
+		item.Command()
+	}
 }
 
-func (m *Menu) runCommand(key keyboard.Key) func() {
-	var cmd = map[keyboard.Key]func() func(){
+func (m *Menu) runCommand(key keyboard.Key) {
+	var cmd = map[keyboard.Key]func(){
 		keyboard.KeyArrowUp:   m.MoveCursorUp,
 		keyboard.KeyArrowDown: m.MoveCursorDown,
 		keyboard.KeyEnter:     m.Select,
 	}
-	return cmd[key]()
+	if command, found := cmd[key]; found {
+		command()
+	}
 }
 
 func clearScreen() {
@@ -96,7 +96,7 @@ func clearScreen() {
 	cmd.Run()
 }
 
-func (m *Menu) Loop() func() {
+func (m *Menu) Loop() {
 	for {
 		clearScreen()
 		m.Render()
@@ -109,11 +109,6 @@ func (m *Menu) Loop() func() {
 			clearScreen()
 			break
 		}
-		cmd := m.runCommand(key)
-		if cmd != nil {
-			return cmd
-		}
+		m.runCommand(key)
 	}
-
-	return nil
 }
