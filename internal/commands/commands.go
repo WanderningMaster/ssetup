@@ -2,7 +2,9 @@ package commands
 
 import (
 	"log"
+	"sync"
 
+	"github.com/WanderningMaster/ssetup.git/internal/render"
 	"github.com/WanderningMaster/ssetup.git/internal/store"
 )
 
@@ -17,6 +19,18 @@ type Command struct {
 	exec  func([]string)
 }
 
+func execWithLoader(cmd func()) {
+	var wg sync.WaitGroup
+	stopChan := make(chan struct{})
+	wg.Add(1)
+
+	go render.Loader(&wg, stopChan)
+	cmd()
+
+	close(stopChan)
+	wg.Wait()
+}
+
 func addCommand(args []string) {
 	if args[0] == "add" && len(args) == 2 {
 		store.AddFile(args[1])
@@ -29,6 +43,7 @@ func ProcessArgs(args []string) {
 	cmd := map[CommandIdent]func([]string){
 		Add: addCommand,
 	}
-
-	cmd[args[0]](args)
+	execWithLoader(func() {
+		cmd[args[0]](args)
+	})
 }
